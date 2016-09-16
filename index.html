@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Progress Bar Demo</title>
+    <style>
+        .progress{
+            position: fixed;
+            right: 0;
+            left: 0;
+            height: 8px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        .progress-inner{
+            width: 1%;
+            background: rgba(97, 72, 233, 1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body ng-app="progress.demo.module">
+
+<div ng-controller="progressController">
+    <div class="progress" id="progressContainer" style="display: none;">
+        <div class="progress-inner" id="progress"></div>
+    </div>
+    <br>
+    <button ng-click="startProgress(started)">Click Me!</button>
+</div>
+
+<script src="js/angular.min.js"></script>
+<script>
+    var module = angular.module( "progress.demo.module", [] );
+    module.controller('progressController', function($rootScope, $scope, $timeout) {
+        $scope.started = false;
+        $scope.startProgress = function(started) {
+            if (!started)
+                $rootScope.$broadcast("progressStart");
+        };
+        $scope.$on('progressStart', function() {
+            $scope.started = true;
+            var $progress = document.getElementById('progress');
+            var progress = 1;
+            var random = function(min, max){
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            };
+
+            var container = document.getElementById('progressContainer');
+            container.style.display = "";
+
+            var onProgress = function() {
+                var timeout = random(30, 60);
+                $timeout(function() {
+                    progress += random(1, 3);
+                    if (progress > 100) {
+                        progress = 100;
+                    }
+                    if (progress < 100) {
+                        $progress.style.width = progress + '%';
+                        onProgress();
+                    }
+                    else {
+                        container.style.display = "none";
+                        $progress.style.width = '1%';
+                        $scope.started = false;
+                    }
+                }, timeout);
+            };
+            onProgress();
+        });
+    })
+</script>
+</body>
+</html>
